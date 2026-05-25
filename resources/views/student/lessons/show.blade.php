@@ -166,6 +166,33 @@
                 
             </div>
 
+            {{-- 🔜 NEXT LESSON BUTTON --}}
+            @if($isCompleted && isset($nextLesson))
+                <div class="mt-6">
+                    <a href="{{ route('student.lessons.show', $nextLesson) }}"
+                       class="flex items-center justify-between w-full px-6 py-5 bg-gradient-to-r from-indigo-600/20 to-purple-600/20 hover:from-indigo-600/30 hover:to-purple-600/30 border border-indigo-500/20 hover:border-indigo-500/40 rounded-2xl transition-all duration-300 group">
+                        <div>
+                            <p class="text-xs font-bold text-indigo-400/70 uppercase tracking-widest mb-1">Next Lesson</p>
+                            <p class="text-white font-bold text-lg group-hover:text-indigo-300 transition-colors">{{ $nextLesson->title }}</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center group-hover:bg-indigo-500/30 transition-colors">
+                            <svg class="w-5 h-5 text-indigo-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </div>
+                    </a>
+                </div>
+            @elseif($isCompleted && !isset($nextLesson))
+                <div class="mt-6 text-center p-6 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
+                    <div class="text-3xl mb-2">🎉</div>
+                    <p class="text-emerald-400 font-bold text-lg">Course Complete!</p>
+                    <p class="text-slate-400 text-sm mt-1">You've finished all lessons in this course. Amazing work!</p>
+                    <a href="{{ route('student.courses.index') }}" class="inline-block mt-4 px-6 py-2.5 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/20 text-emerald-400 font-bold text-sm rounded-xl transition">
+                        ← Back to My Courses
+                    </a>
+                </div>
+            @endif
+
         </div>
 
     </div>

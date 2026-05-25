@@ -41,6 +41,7 @@ class CourseController extends Controller
             'description' => $request->description,
             'status' => 'draft', // default status
             'thumbnail' => $path,
+            'is_sequential' => $request->boolean('is_sequential', true),
         ]);
 
         return redirect()
@@ -70,6 +71,7 @@ class CourseController extends Controller
         $course->title = $request->title;
         $course->description = $request->description;
         $course->status = $request->status;
+        $course->is_sequential = $request->boolean('is_sequential', true);
 // If remove checkbox checked
         if ($request->remove_thumbnail) {
 
