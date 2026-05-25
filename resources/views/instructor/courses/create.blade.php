@@ -109,6 +109,28 @@
                             </select>
                         </div>
 
+                        {{-- SEQUENTIAL MODE TOGGLE --}}
+                        <div>
+                            <label class="block text-sm font-black text-gray-400 uppercase tracking-widest mb-3 ms-1">
+                                Lesson Progression
+                            </label>
+                            <div class="flex items-start gap-4 p-5 bg-white/5 border border-white/10 rounded-2xl">
+                                <input type="hidden" name="is_sequential" value="0">
+                                <input type="checkbox"
+                                       name="is_sequential"
+                                       value="1"
+                                       {{ old('is_sequential', true) ? 'checked' : '' }}
+                                       class="w-5 h-5 mt-0.5 rounded bg-slate-800 border-slate-600 text-indigo-500 focus:ring-indigo-500 cursor-pointer">
+                                <div>
+                                    <p class="text-white font-bold text-sm">Sequential Mode</p>
+                                    <p class="text-slate-400 text-xs mt-1 leading-relaxed">
+                                        When <span class="text-indigo-400 font-bold">ON</span>, students must complete lessons in order — they cannot skip ahead.
+                                        When <span class="text-slate-300 font-bold">OFF</span>, students can access any lesson freely.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
                         {{-- BUTTON --}}
                         <div class="pt-6">
                             <button type="submit"

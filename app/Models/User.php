@@ -64,21 +64,26 @@ class User extends Authenticatable
             'is_approved' => 'boolean',
         ];
     }
-    public function enrolledCourses()
-    {
-        return $this->belongsToMany(Course::class, 'course_user')
-            ->withTimestamps()
-            ->withPivot('enrolled_at');
-    }
+   
 
     public function lessonCompletions()
     {
         return $this->hasMany(LessonCompletion::class);
     }
 
-    public function courses()
+   // For students — already exists, keep this one
+ public function enrolledCourses()
     {
-        return $this->hasMany(Course::class, 'instructor_id');
+        return $this->belongsToMany(Course::class, 'course_user')
+            ->withTimestamps()
+            ->withPivot('enrolled_at');
     }
+
+
+public function Courses()
+{
+    return $this->hasMany(Course::class, 'instructor_id');
+}
+
 
 }

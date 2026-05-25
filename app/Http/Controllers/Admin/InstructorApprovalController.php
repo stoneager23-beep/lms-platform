@@ -15,35 +15,49 @@ class InstructorApprovalController extends Controller
      * Admin Dashboard
      */
     public function dashboard()
-    {
-        $stats = [
-            'totalStudents'    => User::where('role', 'student')->count(),
-            'totalInstructors' => User::where('role', 'instructor')->count(),
-            'activeCourses'    => Course::count(),
-            'pendingCount'     => User::where('role', 'instructor')->where('is_approved', false)->count(),
-        ];
-
-        $pendingInstructors = User::where('role', 'instructor')
-            ->where('is_approved', false)
-            ->latest()
-            ->take(5)
-            ->get();
-
-        return view('admin.dashboard', compact('stats', 'pendingInstructors'));
-    }
+{
+    $stats = [
+        'totalStudents'    => User::where('role', 'student')->count(),
+        'totalInstructors' => User::where('role', 'instructor')->where('is_approved', true)->count(),
+        'activeCourses'    => Course::count(),
+        'pendingCount'     => User::where('role', 'instructor')->where('is_approved', false)->count(),
+    ];
+ 
+    $pendingInstructors = User::where('role', 'instructor')
+        ->where('is_approved', false)
+        ->latest()
+        ->get();
+ 
+    //  NEW: approved instructors with course count
+    $approvedInstructors = User::where('role', 'instructor')
+        ->where('is_approved', true)
+        ->withCount('courses')
+        ->latest()
+        ->get();
+ 
+    return view('admin.dashboard', compact('stats', 'pendingInstructors', 'approvedInstructors'));
+}
 
     /**
      * Full Pending List
      */
     public function index()
-    {
-        $pendingInstructors = User::where('role', 'instructor')
-            ->where('is_approved', false)
-            ->latest()
-            ->get();
-
-        return view('admin.instructors.index', compact('pendingInstructors'));
-    }
+{
+    $pendingInstructors = User::where('role', 'instructor')
+        ->where('is_approved', false)
+        ->latest()
+        ->get();
+ 
+    //  NEW
+    $approvedInstructors = User::where('role', 'instructor')
+        ->where('is_approved', true)
+        ->withCount('courses')
+        ->latest()
+        ->get();
+ 
+    return view('admin.instructors.index', compact('pendingInstructors', 'approvedInstructors'));
+}
+ 
 
     /**
      * List all active (approved) instructors

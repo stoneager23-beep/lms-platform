@@ -17,6 +17,11 @@ class Course extends Model
         'description',
         'status',
         'thumbnail',
+        'is_sequential',
+    ];
+
+    protected $casts = [
+        'is_sequential' => 'boolean',
     ];
 
     public function instructor()

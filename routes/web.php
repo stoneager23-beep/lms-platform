@@ -7,6 +7,10 @@ use App\Http\Controllers\Instructor\CourseController;
 use App\Http\Controllers\Instructor\LessonController as InstructorLessonController;
 use App\Http\Controllers\Student\EnrollmentController;
 use App\Http\Controllers\Student\LessonController as StudentLessonController;
+use App\Http\Controllers\Student\StudentDashboardController;
+use App\Http\Controllers\Instructor\InstructorDashboardController;
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -77,10 +81,7 @@ Route::middleware(['auth', 'instructor.approved'])
     ->name('instructor.')
     ->group(function () {
 
-        Route::get('/dashboard', function () {
-            return view('dashboards.instructor');
-        })->name('dashboard');
-
+        Route::get('/dashboard', [InstructorDashboardController::class, 'index'])->name('dashboard');
         // Courses CRUD
         Route::resource('courses', CourseController::class);
 
@@ -132,10 +133,7 @@ Route::middleware('auth')
     ->group(function () {
 
         // Dashboard
-        Route::get('/dashboard', function () {
-            return view('dashboards.student');
-        })->name('dashboard');
-
+        Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
         // 🔹 COURSES (My Learning)
         Route::get('/my-courses', [EnrollmentController::class, 'index'])
             ->name('courses.index');

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Models\Lesson;
+use App\Models\LessonCompletion;
 use App\Models\Quiz;
 use App\Models\Question;
 use App\Models\Option;
@@ -38,8 +39,15 @@ class InstructorQuizController extends Controller
         ]);
 
         $quiz = $lesson->quiz ?? new Quiz(['lesson_id' => $lesson->id]);
+        $isNewQuiz = !$quiz->exists;
         $quiz->fill($data);
         $quiz->save();
+
+        // If a new quiz was just created, invalidate existing completions
+        // Students will need to pass the quiz to re-complete the lesson
+        if ($isNewQuiz) {
+            LessonCompletion::where('lesson_id', $lesson->id)->delete();
+        }
 
         return back()->with('success', 'Quiz settings updated.');
     }
@@ -70,6 +78,12 @@ class InstructorQuizController extends Controller
                 'option_text' => $optionText,
                 'is_correct' => ($index == $data['correct_option']),
             ]);
+        }
+
+        // If this is the first question, invalidate existing completions
+        // The quiz now has real content — previous no-quiz completions are invalid
+        if ($quiz->questions()->count() === 1) {
+            LessonCompletion::where('lesson_id', $quiz->lesson_id)->delete();
         }
 
         return back()->with('success', 'Question added successfully.');
