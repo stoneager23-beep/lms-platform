@@ -5,41 +5,70 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\InstructorApprovalController;
 use App\Http\Controllers\Instructor\CourseController;
 use App\Http\Controllers\Instructor\LessonController as InstructorLessonController;
+use App\Http\Controllers\Instructor\InstructorDashboardController;
 use App\Http\Controllers\Student\EnrollmentController;
 use App\Http\Controllers\Student\LessonController as StudentLessonController;
 use App\Http\Controllers\Student\StudentDashboardController;
-use App\Http\Controllers\Instructor\InstructorDashboardController;
-
-
 
 /*
 |--------------------------------------------------------------------------
 | Home Redirect
 |--------------------------------------------------------------------------
 */
+
 Route::get('/', function () {
-    if (!auth()->check()) {
+    if (! auth()->check()) {
         return redirect()->route('login');
     }
 
-    return redirect()->route(
-        auth()->user()->isAdmin()
-            ? 'admin.dashboard'
-            : (auth()->user()->isInstructor()
-            ? 'instructor.dashboard'
-            : 'student.dashboard')
-    );
+    return redirect()->route('dashboard');
 });
 
 /*
 |--------------------------------------------------------------------------
-| Authenticated (Common)
+| Central Dashboard Redirect
+|--------------------------------------------------------------------------
+|
+| Laravel authentication controllers redirect to route('dashboard').
+| This route forwards each authenticated user to their role-based dashboard.
+|
+*/
+
+Route::get('/dashboard', function () {
+    $user = auth()->user();
+
+    if ($user->isAdmin()) {
+        return redirect()->route('admin.dashboard');
+    }
+
+    if ($user->isInstructor()) {
+        if (! $user->is_approved) {
+            return redirect()->route('instructor.pending');
+        }
+
+        return redirect()->route('instructor.dashboard');
+    }
+
+    return redirect()->route('student.dashboard');
+})
+    ->middleware('auth')
+    ->name('dashboard');
+
+/*
+|--------------------------------------------------------------------------
+| Authenticated Common Routes
 |--------------------------------------------------------------------------
 */
+
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile', [ProfileController::class, 'edit'])
+        ->name('profile.edit');
+
+    Route::patch('/profile', [ProfileController::class, 'update'])
+        ->name('profile.update');
+
+    Route::delete('/profile', [ProfileController::class, 'destroy'])
+        ->name('profile.destroy');
 });
 
 /*
@@ -47,11 +76,11 @@ Route::middleware('auth')->group(function () {
 | Admin Routes
 |--------------------------------------------------------------------------
 */
+
 Route::middleware(['auth', 'admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
-
         Route::get('/dashboard', [InstructorApprovalController::class, 'dashboard'])
             ->name('dashboard');
 
@@ -76,16 +105,28 @@ Route::middleware(['auth', 'admin'])
 | Instructor Routes
 |--------------------------------------------------------------------------
 */
+
 Route::middleware(['auth', 'instructor.approved'])
     ->prefix('instructor')
     ->name('instructor.')
     ->group(function () {
+        Route::get('/dashboard', [InstructorDashboardController::class, 'index'])
+            ->name('dashboard');
 
-        Route::get('/dashboard', [InstructorDashboardController::class, 'index'])->name('dashboard');
-        // Courses CRUD
+        /*
+        |--------------------------------------------------------------------------
+        | Courses CRUD
+        |--------------------------------------------------------------------------
+        */
+
         Route::resource('courses', CourseController::class);
 
-        // Lessons under course
+        /*
+        |--------------------------------------------------------------------------
+        | Lessons
+        |--------------------------------------------------------------------------
+        */
+
         Route::get('courses/{course}/lessons', [InstructorLessonController::class, 'index'])
             ->name('courses.lessons.index');
 
@@ -104,12 +145,26 @@ Route::middleware(['auth', 'instructor.approved'])
         Route::delete('lessons/{lesson}', [InstructorLessonController::class, 'destroy'])
             ->name('lessons.destroy');
 
-        // Q U I Z Z E S
-        Route::controller(\App\Http\Controllers\Instructor\InstructorQuizController::class)->group(function () {
-            Route::get('lessons/{lesson}/quiz', 'edit')->name('lessons.quiz.edit');
-            Route::put('lessons/{lesson}/quiz', 'update')->name('lessons.quiz.update');
-            Route::post('quizzes/{quiz}/questions', 'storeQuestion')->name('quizzes.questions.store');
-            Route::delete('questions/{question}', 'destroyQuestion')->name('questions.destroy');
+        /*
+        |--------------------------------------------------------------------------
+        | Quizzes
+        |--------------------------------------------------------------------------
+        */
+
+        Route::controller(
+            \App\Http\Controllers\Instructor\InstructorQuizController::class
+        )->group(function () {
+            Route::get('lessons/{lesson}/quiz', 'edit')
+                ->name('lessons.quiz.edit');
+
+            Route::put('lessons/{lesson}/quiz', 'update')
+                ->name('lessons.quiz.update');
+
+            Route::post('quizzes/{quiz}/questions', 'storeQuestion')
+                ->name('quizzes.questions.store');
+
+            Route::delete('questions/{question}', 'destroyQuestion')
+                ->name('questions.destroy');
         });
     });
 
@@ -118,23 +173,38 @@ Route::middleware(['auth', 'instructor.approved'])
 | Instructor Pending
 |--------------------------------------------------------------------------
 */
-Route::middleware('auth')->get('/instructor/pending', function () {
+
+Route::get('/instructor/pending', function () {
     return view('instructor.pending');
-})->name('instructor.pending');
+})
+    ->middleware('auth')
+    ->name('instructor.pending');
 
 /*
 |--------------------------------------------------------------------------
-| Student Routes (FINAL WORKFLOW)
+| Student Routes
 |--------------------------------------------------------------------------
 */
+
 Route::middleware('auth')
     ->prefix('student')
     ->name('student.')
     ->group(function () {
+        /*
+        |--------------------------------------------------------------------------
+        | Dashboard
+        |--------------------------------------------------------------------------
+        */
 
-        // Dashboard
-        Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
-        // 🔹 COURSES (My Learning)
+        Route::get('/dashboard', [StudentDashboardController::class, 'index'])
+            ->name('dashboard');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Courses / My Learning
+        |--------------------------------------------------------------------------
+        */
+
         Route::get('/my-courses', [EnrollmentController::class, 'index'])
             ->name('courses.index');
 
@@ -144,7 +214,12 @@ Route::middleware('auth')
         Route::delete('/courses/{course}/unenroll', [EnrollmentController::class, 'destroy'])
             ->name('courses.unenroll');
 
-        // 🔹 LESSONS (Direct access)
+        /*
+        |--------------------------------------------------------------------------
+        | Lessons
+        |--------------------------------------------------------------------------
+        */
+
         Route::get('/lessons', [StudentLessonController::class, 'index'])
             ->name('lessons.index');
 
@@ -160,20 +235,22 @@ Route::middleware('auth')
 
 /*
 |--------------------------------------------------------------------------
-| Course Catalog (Public/Student)
+| Course Catalog
 |--------------------------------------------------------------------------
 */
+
 Route::middleware('auth')->group(function () {
     Route::get('/courses', [\App\Http\Controllers\CourseController::class, 'index'])
-        ->name('courses.index'); // Public Catalog
+        ->name('courses.index');
 
     Route::get('/courses/{course}', [\App\Http\Controllers\CourseController::class, 'show'])
-        ->name('courses.show'); // Course Details
+        ->name('courses.show');
 });
 
 /*
 |--------------------------------------------------------------------------
-| Auth Routes
+| Authentication Routes
 |--------------------------------------------------------------------------
 */
+
 require __DIR__ . '/auth.php';

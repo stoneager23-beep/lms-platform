@@ -133,11 +133,11 @@
             <div class="stats-grid">
                 @php
                     $stats = [
-                        ['icon'=>'📚','bg'=>'rgba(108,140,255,.12)','val'=>$totalCourses,    'lbl'=>'Total Courses'],
-                        ['icon'=>'✅','bg'=>'rgba(56,226,184,.12)', 'val'=>$publishedCourses,'lbl'=>'Published'],
-                        ['icon'=>'✏️', 'bg'=>'rgba(249,115,22,.12)', 'val'=>$draftCourses,    'lbl'=>'Drafts'],
-                        ['icon'=>'👥','bg'=>'rgba(234,179,8,.12)',  'val'=>$totalStudents,   'lbl'=>'Total Students'],
-                        ['icon'=>'📝','bg'=>'rgba(248,113,113,.12)','val'=>$totalAttempts,   'lbl'=>'Quiz Attempts'],
+                        ['icon'=>'','bg'=>'rgba(108,140,255,.12)','val'=>$totalCourses,    'lbl'=>'Total Courses'],
+                        ['icon'=>'','bg'=>'rgba(56,226,184,.12)', 'val'=>$publishedCourses,'lbl'=>'Published'],
+                        ['icon'=>'', 'bg'=>'rgba(249,115,22,.12)', 'val'=>$draftCourses,    'lbl'=>'Drafts'],
+                        ['icon'=>'','bg'=>'rgba(234,179,8,.12)',  'val'=>$totalStudents,   'lbl'=>'Total Students'],
+                        ['icon'=>'','bg'=>'rgba(248,113,113,.12)','val'=>$totalAttempts,   'lbl'=>'Quiz Attempts'],
                     ];
                 @endphp
                 @foreach ($stats as $s)
